@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournament System - Silver Titanium</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; 
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
+
+:root {
+    --bg: #EAECEF;
+    --text: #1D1D1F;
+    --muted: #86868B;
+    --icon: #5A5A5E;
+    --green: #27ae60;
+    --red: #c0392b;
+    --shadow-l: -8px -8px 16px rgba(255,255,255,0.9);
+    --shadow-d: 8px 8px 16px rgba(174,183,194,0.6);
+    --inset-l: inset -4px -4px 8px rgba(255,255,255,0.9);
+    --inset-d: inset 4px 4px 8px rgba(174,183,194,0.6);
+}
+
+body {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+}
+
+.container { width: 100%; max-width: 900px; }
+
+/* Общая карточка */
+.panel {
+    background: linear-gradient(145deg, #f0f2f5 0%, #e6e9ed 100%);
+    border-radius: 30px;
+    box-shadow: var(--shadow-l), var(--shadow-d);
+    padding: 35px;
+    margin-bottom: 25px;
+}
+
+h1, h2, h3 {
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 1px rgba(255,255,255,0.8);
+}
+h1 { font-size: 22px; margin-bottom: 20px; text-align: center; }
+h2 { font-size: 18px; margin-bottom: 15px; }
+h3 { font-size: 14px; margin-bottom: 10px; color: var(--muted); }
+
+/* Табы (переключатели) */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 12px 22px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(145deg, #f0f2f5, #e6e9ed);
+    box-shadow: var(--shadow-l), var(--shadow-d);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: all 0.2s;
+}
+.tab-btn.active {
+    color: var(--text);
+    box-shadow: var(--inset-l), var(--inset-d);
+}
+.tab-btn:hover:not(.active) { color: var(--text); }
+
+/* Формы */
+.input-group { margin-bottom: 18px; }
+.input-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    padding-left: 15px;
+}
+.input-group input, .input-group select {
+    width: 100%;
+    background: var(--bg);
+    border: none;
+    outline: none;
+    padding: 16px 20px;
+    border-radius: 50px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--inset-l), var(--inset-d);
+    transition: all 0.3s;
+}
+.input-group input::placeholder { color: #A1A1A6; }
+.input-group input:focus, .input-group select:focus {
+    box-shadow: inset 6px 6px 12px rgba(174,183,194,0.8),
+                inset -6px -6px 12px rgba(255,255,255,1);
+}
+
+/* Кнопки */
+.btn {
+    display: inline-block;
+    width: 100%;
+    background: linear-gradient(135deg, #5A5A5E 0%, #2C2C2E 100%);
+    color: #FFF;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 
+        0 0 15px rgba(255,255,255,0.5),
+        6px 6px 12px rgba(174,183,194,0.6),
+        -6px -6px 12px rgba(255,255,255,0.9),
+        inset 1px 1px 2px rgba(255,255,255,0.4);
+    transition: all 0.25s;
+}
+.btn:hover {
+    background: linear-gradient(135deg, #6A6A6E, #3C3C3E);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 0 25px rgba(255,255,255,0.85),
+        8px 8px 16px rgba(174,183,194,0.7),
+        -8px -8px 16px rgba(255,255,255,1),
+        inset 1px 1px 3px rgba(255,255,255,0.6);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-small {
+    padding: 10px 18px;
+    font-size: 11px;
+    width: auto;
+    letter-spacing: 1.2px;
+}
+.btn-light {
+    background: linear-gradient(145deg, #f0f2f5, #e6e9ed);
+    color: var(--text);
+    box-shadow: var(--shadow-l), var(--shadow-d);
+}
+.btn-light:hover {
+    background: linear-gradient(145deg, #f5f7fa, #e9ecf0);
+    box-shadow: 6px 6px 14px rgba(174,183,194,0.7),
+                -6px -6px 14px rgba(255,255,255,1);
+}
+.btn-danger {
+    background: linear-gradient(135deg, #b03a2e, #7b241c);
+}
+.btn-danger:hover { background: linear-gradient(135deg, #c0392b, #922b21); }
+
+/* Сообщения */
+.msg {
+    padding: 12px 18px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 18px;
+    box-shadow: var(--inset-l), var(--inset-d);
+    display: none;
+}
+.msg.show { display: block; }
+.msg.error { color: var(--red); }
+.msg.success { color: var(--green); }
+
+/* Карточки турниров */
+.tournaments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.tournament-card {
+    background: var(--bg);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: var(--shadow-l), var(--shadow-d);
+    transition: all 0.3s;
+}
+.tournament-card:hover { transform: translateY(-3px); }
+
+.tournament-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);   
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+.tournament-game {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+.tournament-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 15px;
+}
+.tournament-players {
+    font-size: 11px;
+    color: var(--icon);
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: var(--green);
+    color: #FFF;
+    text-transform: uppercase;
+}
+.badge.joined { background: var(--green); }
+.badge.open { background: var(--icon); }
+
+/* Таблица игроков */
+.table-wrap {
+    overflow-x: auto;
+    border-radius: 18px;
+    box-shadow: var(--inset-l), var(--inset-d);
+    padding: 10px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+table th {
+    text-align: left;
+    padding: 12px 15px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-bottom: 2px solid rgba(174,183,194,0.3);
+}
+table td {
+    padding: 14px 15px;
+    color: var(--text);
+    border-bottom: 1px solid rgba(174,183,194,0.15);
+}
+table tr:last-child td { border-bottom: none; }
+table tr:hover td { background: rgba(255,255,255,0.4); }
+
+/* Пустое состояние */
+.empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+}
+.empty svg {
+    width: 50px; height: 50px;
+    fill: #C8CDD4;
+    margin-bottom: 15px;
+}
+
+.hidden { display: none !important; }
+
+/* Статистика */
+.stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+.stat-item {
+    flex: 1;
+    min-width: 120px;
+    padding: 18px;
+    border-radius: 18px;
+    background: var(--bg);
+    box-shadow: var(--inset-l), var(--inset-d);
+    text-align: center;
+}
+.stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+}
+.stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ============= ГЛАВНЫЕ ТАБЫ ============= -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchMain('player')">👤 ИГРОК</button>
+        <button class="tab-btn" onclick="switchMain('admin')">⚙️ АДМИН</button>
+    </div>
+
+    <!-- ============== ИГРОК ============== -->
+    <div id="playerSection">
+
+        <!-- Вход / Регистрация -->
+        <div class="panel" id="authPanel">
+            <h1 id="authTitle">РЕГИСТРАЦИЯ</h1>
+            <div class="msg" id="authMsg"></div>
+            <div class="input-group">
+                <label>Логин (Email)</label>
+                <input type="email" id="authEmail" placeholder="player@mail.com">
+            </div>
+            <div class="input-group">
+                <label>Пароль</label>
+                <input type="password" id="authPass" placeholder="••••••••">
+            </div>
+            <div class="input-group" id="confirmWrap">
+                <label>Подтверждение пароля</label>
+                <input type="password" id="authConfirm" placeholder="••••••••">
+            </div>
+            <button class="btn" id="authBtn" onclick="authAction()">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+            <button class="btn btn-light" style="margin-top:12px;" onclick="switchAuthMode()">
+                <span id="switchAuthText">Уже есть аккаунт? Войти</span>
+            </button>
+        </div>
+
+        <!-- Личный кабинет -->
+        <div class="panel hidden" id="playerPanel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h1 style="margin:0;">МОИ ТУРНИРЫ</h1>
+                <button class="btn btn-light btn-small" onclick="logout()">ВЫЙТИ</button>
+            </div>
+            <div class="msg" id="playerMsg"></div>
+            <div id="myTournaments"></div>
+        </div>
+
+        <!-- Доступные турниры -->
+        <div class="panel hidden" id="tournamentsPanel">
+            <h1>ДОСТУПНЫЕ ТУРНИРЫ</h1>
+            <div class="msg" id="joinMsg"></div>
+            <div class="tournaments-grid" id="tournamentsGrid"></div>
+        </div>
+
+    </div>
+
+    <!-- ============== АДМИН ============== -->
+    <div id="adminSection" class="hidden">
+
+        <!-- Вход админа -->
+        <div class="panel" id="adminAuthPanel">
+            <h1>ВХОД АДМИНИСТРАТОРА</h1>
+            <div class="msg" id="adminMsg"></div>
+            <div class="input-group">
+                <label>Пароль администратора</label>
+                <input type="password" id="adminPass" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="adminLogin()">ВОЙТИ</button>
+            <p style="text-align:center;margin-top:15px;font-size:11px;color:var(--muted);">
+                Подсказка: пароль по умолчанию <b>admin123</b>
+            </p>
+        </div>
+
+        <!-- Панель админа -->
+        <div id="adminPanel" class="hidden">
+
+            <div class="panel">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h1 style="margin:0;">ПАНЕЛЬ АДМИНА</h1>
+                    <button class="btn btn-light btn-small" onclick="adminLogout()">ВЫЙТИ</button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statPlayers">0</div>
+                        <div class="stat-label">Игроков</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTournaments">0</div>
+                        <div class="stat-label">Турниров</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statJoins">0</div>
+                        <div class="stat-label">Участий</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Создание турнира -->
+            <div class="panel">
+                <h2>СОЗДАТЬ ТУРНИР</h2>
+                <div class="msg" id="createMsg"></div>
+                <div class="input-group">
+                    <label>Название турнира</label>
+                    <input type="text" id="tName" placeholder="Например: Кубок Осени 2025">
+                </div>
+                <div class="input-group">
+                    <label>Игра</label>
+                    <input type="text" id="tGame" placeholder="Например: CS2, Dota 2, Valorant">
+                </div>
+                <div class="input-group">
+                    <label>Дата</label>
+                    <input type="date" id="tDate">
+                </div>
+                <button class="btn" onclick="createTournament()">СОЗДАТЬ ТУРНИР</button>
+            </div>
+
+            <!-- Таблица игроков -->
+            <div class="panel">
+                <h2>ВСЕ ИГРОКИ</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Email</th>
+                                <th>Дата регистрации</th>
+                                <th>Турниров</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Таблица турниров -->
+            <div class="panel">
+                <h2>ВСЕ ТУРНИРЫ</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>Игра</th>
+                                <th>Дата</th>
+                                <th>Участников</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tournamentsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Участники конкретного турнира -->
+            <div class="panel">
+                <h2>УЧАСТНИКИ ТУРНИРА</h2>
+                <div class="input-group">
+                    <label>Выберите турнир</label>
+                    <select id="selectTournament" onchange="renderTournamentPlayers()">
+                        <option value="">— Выберите турнир —</option>
+                    </select>
+                </div>
+                <div id="tournamentPlayersList" style="margin-top:15px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* =========================================================
+   "БАЗА ДАННЫХ" (LocalStorage)
+   ========================================================= */
+const DB = {
+    users: 'ts_users',
+    tournaments: 'ts_tournaments',
+    joins: 'ts_joins',
+    session: 'ts_session',
+    adminSession: 'ts_admin'
+};
+
+const ADMIN_PASSWORD = 'admin123';
+
+function get(key) { return JSON.parse(localStorage.getItem(key) || '[]'); }
+function set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+function getUsers() { return get(DB.users); }
+function setUsers(u) { set(DB.users, u); }
+function getTournaments() { return get(DB.tournaments); }
+function setTournaments(t) { set(DB.tournaments, t); }
+function getJoins() { return get(DB.joins); }
+function setJoins(j) { set(DB.joins, j); }
+
+function getCurrentUser() {
+    const email = localStorage.getItem(DB.session);
+    return email ? getUsers().find(u => u.email === email) : null;
+}
+function setCurrentUser(email) { localStorage.setItem(DB.session, email); }
+function clearCurrentUser() { localStorage.removeItem(DB.session); }
+
+/* =========================================================
+   НАВИГАЦИЯ
+   ========================================================= */
+let authMode = 'register'; // register | login
+
+function switchMain(where) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', (i === 0 && where === 'player') || (i === 1 && where === 'admin'));
+    });
+    document.getElementById('playerSection').classList.toggle('hidden', where !== 'player');
+    document.getElementById('adminSection').classList.toggle('hidden', where !== 'admin');
+
+    if (where === 'player') checkPlayerSession();
+    if (where === 'admin') checkAdminSession();
+}
+
+/* =========================================================
+   АВТОРИЗАЦИЯ ИГРОКА
+   ========================================================= */
+function switchAuthMode() {
+    authMode = authMode === 'register' ? 'login' : 'register';
+    document.getElementById('authTitle').textContent = authMode === 'register' ? 'РЕГИСТРАЦИЯ' : 'ВХОД';
+    document.getElementById('authBtn').textContent = authMode === 'register' ? 'ЗАРЕГИСТРИРОВАТЬСЯ' : 'ВОЙТИ';
+    document.getElementById('switchAuthText').textContent = authMode === 'register' ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Регистрация';
+    document.getElementById('confirmWrap').classList.toggle('hidden', authMode === 'login');
+}
+
+function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg show ' + type;
+    setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function authAction() {
+    const email = document.getElementById('authEmail').value.trim().toLowerCase();
+    const pass = document.getElementById('authPass').value;
+    const confirm = document.getElementById('authConfirm').value;
+
+    if (!email || !pass) return showMsg('authMsg', 'Заполните все поля', 'error');
+    if (!email.includes('@')) return showMsg('authMsg', 'Некорректный email', 'error');
+
+    const users = getUsers();
+
+    if (authMode === 'register') {
+        if (pass !== confirm) return showMsg('authMsg', 'Пароли не совпадают', 'error');
+        if (users.find(u => u.email === email)) return showMsg('authMsg', 'Email уже занят', 'error');
+        users.push({
+            id: Date.now(),
+            email,
+            password: btoa(pass), // простое кодирование
+            created_at: new Date().toLocaleString('ru-RU')
+        });
+        setUsers(users);
+        showMsg('authMsg', 'Успешно! Теперь войдите.', 'success');
+        setTimeout(() => switchAuthMode(), 1000);
+    } else {
+        const user = users.find(u => u.email === email);
+        if (!user || user.password !== btoa(pass)) return showMsg('authMsg', 'Неверный email или пароль', 'error');
+        setCurrentUser(email);
+        showMsg('authMsg', 'Добро пожаловать!', 'success');
+        setTimeout(checkPlayerSession, 600);
+    }
+}
+
+function logout() {
+    clearCurrentUser();
+    checkPlayerSession();
+}
+
+function checkPlayerSession() {
+    const user = getCurrentUser();
+    const authPanel = document.getElementById('authPanel');
+    const playerPanel = document.getElementById('playerPanel');
+    const tournamentsPanel = document.getElementById('tournamentsPanel');
+
+    if (user) {
+        authPanel.classList.add('hidden');
+        playerPanel.classList.remove('hidden');
+        tournamentsPanel.classList.remove('hidden');
+        renderMyTournaments();
+        renderTournaments();
+    } else {
+        authPanel.classList.remove('hidden');
+        playerPanel.classList.add('hidden');
+        tournamentsPanel.classList.add('hidden');
+    }
+}
+
+/* =========================================================
+   ТУРНИРЫ ДЛЯ ИГРОКА
+   ========================================================= */
+function renderTournaments() {
+    const user = getCurrentUser();
+    const tournaments = getTournaments();
+    const joins = getJoins();
+    const grid = document.getElementById('tournamentsGrid');
+
+    if (tournaments.length === 0) {
+        grid.innerHTML = `<div class="empty">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+            <div>Пока нет доступных турниров</div>
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = '';
+    tournaments.forEach(t => {
+        const players = joins.filter(j => j.tournamentId === t.id);
+        const joined = user && players.some(p => p.userId === user.id);
+
+        const card = document.createElement('div');
+        card.className = 'tournament-card';
+        card.innerHTML = `
+            <div class="tournament-name">${escapeHtml(t.name)}</div>
+            <div class="tournament-game">${escapeHtml(t.game)}</div>
+            <div class="tournament-meta">📅 ${t.date || 'Дата не указана'}</div>
+            <div class="tournament-players">👥 Участников: ${players.length}</div>
+            ${joined 
+                ? `<span class="badge joined">✓ Вы участвуете</span>` 
+                : `<button class="btn btn-small" onclick="joinTournament(${t.id})">УЧАСТВОВАТЬ</button>`}
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function joinTournament(tournamentId) {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const joins = getJoins();
+    if (joins.some(j => j.tournamentId === tournamentId && j.userId === user.id)) {
+        return showMsg('joinMsg', 'Вы уже участвуете в этом турнире', 'error');
+    }
+
+    joins.push({
+        id: Date.now(),
+        tournamentId,
+        userId: user.id,
+        userEmail: user.email,
+        joined_at: new Date().toLocaleString('ru-RU')
+    });
+    setJoins(joins);
+    showMsg('joinMsg', 'Вы записались на турнир!', 'success');
+    renderTournaments();
+    renderMyTournaments();
+}
+
+function renderMyTournaments() {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const joins = getJoins().filter(j => j.userId === user.id);
+    const tournaments = getTournaments();
+    const wrap = document.getElementById('myTournaments');
+
+    if (joins.length === 0) {
+        wrap.innerHTML = `<div class="empty">
+            <svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 4l7.5 13h-15L12 6z"/></svg>
+            <div>Вы пока не участвуете ни в одном турнире</div>
+        </div>`;
+        return;
+    }
+
+    wrap.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'tournaments-grid';
+    joins.forEach(j => {
+        const t = tournaments.find(x => x.id === j.tournamentId);
+        if (!t) return;
+        const card = document.createElement('div');
+        card.className = 'tournament-card';
+        card.innerHTML = `
+            <div class="tournament-name">${escapeHtml(t.name)}</div>
+            <div class="tournament-game">${escapeHtml(t.game)}</div>
+            <div class="tournament-meta">📅 ${t.date || '—'}</div>
+            <div class="tournament-meta">🕐 Записались: ${j.joined_at}</div>
+            <span class="badge joined">✓ Участвую</span>
+        `;
+        grid.appendChild(card);
+    });
+    wrap.appendChild(grid);
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+}
+
+/* =========================================================
+   АДМИН
+   ========================================================= */
+function checkAdminSession() {
+    const isAdmin = localStorage.getItem(DB.adminSession) === '1';
+    document.getElementById('adminAuthPanel').classList.toggle('hidden', isAdmin);
+    document.getElementById('adminPanel').classList.toggle('hidden', !isAdmin);
+    if (isAdmin) renderAdminData();
+}
+
+function adminLogin() {
+    const pass = document.getElementById('adminPass').value;
+    if (pass === ADMIN_PASSWORD) {
+        localStorage.setItem(DB.adminSession, '1');
+        showMsg('adminMsg', 'Добро пожаловать!', 'success');
+        setTimeout(checkAdminSession, 400);
+    } else {
+        showMsg('adminMsg', 'Неверный пароль', 'error');
+    }
+}
+
+function adminLogout() {
+    localStorage.removeItem(DB.adminSession);
+    checkAdminSession();
+}
+
+function createTournament() {
+    const name = document.getElementById('tName').value.trim();
+    const game = document.getElementById('tGame').value.trim();
+    const date = document.getElementById('tDate').value;
+
+    if (!name || !game) return showMsg('createMsg', 'Заполните название и игру', 'error');
+
+    const tournaments = getTournaments();
+    tournaments.push({
+        id: Date.now(),
+        name,
+        game,
+        date: date || '',
+        created_at: new Date().toLocaleString('ru-RU')
+    });
+    setTournaments(tournaments);
+    showMsg('createMsg', 'Турнир создан!', 'success');
+    document.getElementById('tName').value = '';
+    document.getElementById('tGame').value = '';
+    document.getElementById('tDate').value = '';
+    renderAdminData();
+}
+
+function deleteTournament(id) {
+    if (!confirm('Удалить турнир? Все записи на него тоже удалятся.')) return;
+    setTournaments(getTournaments().filter(t => t.id !== id));
+    setJoins(getJoins().filter(j => j.tournamentId !== id));
+    renderAdminData();
+}
+
+function deleteUser(id) {
+    if (!confirm('Удалить игрока? Все его записи на турниры тоже удалятся.')) return;
+    setUsers(getUsers().filter(u => u.id !== id));
+    setJoins(getJoins().filter(j => j.userId !== id));
+    renderAdminData();
+}
+
+function renderAdminData() {
+    const users = getUsers();
+    const tournaments = getTournaments();
+    const joins = getJoins();
+
+    // Статистика
+    document.getElementById('statPlayers').textContent = users.length;
+    document.getElementById('statTournaments').textContent = tournaments.length;
+    document.getElementById('statJoins').textContent = joins.length;
+
+    // Таблица игроков
+    const pt = document.getElementById('playersTable');
+    if (users.length === 0) {
+        pt.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:25px;">Нет игроков</td></tr>`;
+    } else {
+        pt.innerHTML = users.map((u, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${escapeHtml(u.email)}</td>
+                <td>${u.created_at}</td>
+                <td>${joins.filter(j => j.userId === u.id).length}</td>
+                <td><button class="btn btn-small btn-danger" onclick="deleteUser(${u.id})">✕</button></td>
+            </tr>
+        `).join('');
+    }
+
+    // Таблица турниров
+    const tt = document.getElementById('tournamentsTable');
+    if (tournaments.length === 0) {
+        tt.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:25px;">Нет турниров</td></tr>`;
+    } else {
+        tt.innerHTML = tournaments.map(t => `
+            <tr>
+                <td><b>${escapeHtml(t.name)}</b></td>
+                <td>${escapeHtml(t.game)}</td>
+                <td>${t.date || '—'}</td>
+                <td>${joins.filter(j => j.tournamentId === t.id).length}</td>
+                <td><button class="btn btn-small btn-danger" onclick="deleteTournament(${t.id})">✕</button></td>
+            </tr>
+        `).join('');
+    }
+
+    // Селект для просмотра участников
+    const sel = document.getElementById('selectTournament');
+    sel.innerHTML = '<option value="">— Выберите турнир —</option>' +
+        tournaments.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
+}
+
+function renderTournamentPlayers() {
+    const id = parseInt(document.getElementById('selectTournament').value);
+    const list = document.getElementById('tournamentPlayersList');
+    if (!id) { list.innerHTML = ''; return; }
+
+    const joins = getJoins().filter(j => j.tournamentId === id);
+    if (joins.length === 0) {
+        list.innerHTML = `<div class="empty">Нет участников</div>`;
+        return;
+    }
+    list.innerHTML = `<div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Email игрока</th><th>Дата записи</th></tr></thead>
+        <tbody>${joins.map((j, i) => `
+            <tr><td>${i + 1}</td><td>${escapeHtml(j.userEmail)}</td><td>${j.joined_at}</td></tr>
+        `).join('')}</tbody>
+    </table></div>`;
+}
+
+/* =========================================================
+   СТАРТ
+   ========================================================= */
+switchMain('player');
+</script>
+</body>
+</html>
